@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Core.Entities;
 using Core.Interfaces;
+using Core.Specifications;
 
 namespace API.Controllers
 {
@@ -8,9 +9,9 @@ namespace API.Controllers
     [Route("api/[controller]")]
     public class ProductsController : ControllerBase
     {
-        private readonly IProductRepository _repository;
+        private readonly IGenericRepository<Product> _repository;
 
-        public ProductsController(IProductRepository repository)
+        public ProductsController(IGenericRepository<Product> repository)
         {
             _repository = repository;
         }
@@ -22,7 +23,8 @@ namespace API.Controllers
             [FromQuery] string? type = null,
             [FromQuery] string? sort = null)
         {
-            var products = await _repository.GetAllAsync(brand, type, sort);
+            var spec = new ProductSpecification(brand, type, sort);
+            var products = await _repository.GetAllAsync(spec);
             return Ok(products);
         }
 
@@ -44,7 +46,8 @@ namespace API.Controllers
         [HttpGet("brands")]
         public async Task<ActionResult<IEnumerable<string>>> GetBrands()
         {
-            var brands = await _repository.GetBrandsAsync();
+            var spec = new ProductBrandSpecification();
+            var brands = await _repository.GetAllAsync<string>(spec);
             return Ok(brands);
         }
 
@@ -52,7 +55,8 @@ namespace API.Controllers
         [HttpGet("types")]
         public async Task<ActionResult<IEnumerable<string>>> GetTypes()
         {
-            var types = await _repository.GetTypesAsync();
+            var spec = new ProductTypeSpecification();
+            var types = await _repository.GetAllAsync<string>(spec);
             return Ok(types);
         }
 
