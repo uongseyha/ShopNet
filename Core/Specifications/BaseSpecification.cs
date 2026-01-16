@@ -10,6 +10,9 @@ namespace Core.Specifications
         public Expression<Func<T, object>>? OrderByDescending { get; private set; }
         public Expression<Func<T, object>>? Select { get; private set; }
         public bool IsDistinct { get; private set; }
+        public int Take { get; private set; }
+        public int Skip { get; private set; }
+        public bool IsPagingEnabled { get; private set; }
 
         public BaseSpecification()
         {
@@ -43,6 +46,13 @@ namespace Core.Specifications
         protected void ApplyDistinct()
         {
             IsDistinct = true;
+        }
+
+        protected void ApplyPaging(int skip, int take)
+        {
+            Skip = skip;
+            Take = take;
+            IsPagingEnabled = true;
         }
     }
 }

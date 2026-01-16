@@ -62,6 +62,11 @@ namespace Infrastructure.Data
             return await _context.Set<T>().AnyAsync(e => e.Id == id);
         }
 
+        public virtual async Task<int> CountAsync(ISpecification<T> spec)
+        {
+            return await ApplySpecification(spec).CountAsync();
+        }
+
         public virtual async Task<bool> SaveChangesAsync()
         {
             return await _context.SaveChangesAsync() > 0;

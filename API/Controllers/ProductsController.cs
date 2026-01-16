@@ -2,12 +2,12 @@ using Microsoft.AspNetCore.Mvc;
 using Core.Entities;
 using Core.Interfaces;
 using Core.Specifications;
+using Core.Helpers;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace API.Controllers
 {
-    [ApiController]
-    [Route("api/[controller]")]
-    public class ProductsController : ControllerBase
+    public class ProductsController : BaseApiController
     {
         private readonly IGenericRepository<Product> _repository;
 
@@ -16,34 +16,49 @@ namespace API.Controllers
             _repository = repository;
         }
 
-        // GET: api/products?brand=TechMaster&type=Electronics&sort=priceAsc
+        /// <summary>
+        /// Get all products with optional filtering, sorting, and pagination
+        /// </summary>
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Product>>> GetProducts(
-            [FromQuery] string? brand = null, 
-            [FromQuery] string? type = null,
-            [FromQuery] string? sort = null)
+        public async Task<ActionResult<Pagination<Product>>> GetProducts([FromQuery] ProductSpecParams specParams)
         {
-            var spec = new ProductSpecification(brand, type, sort);
-            var products = await _repository.GetAllAsync(spec);
-            return Ok(products);
+            var spec = new ProductSpecification(specParams);
+            var countSpec = new ProductWithFiltersForCountSpecification(specParams);
+
+            return await CreatePageResult(
+                _repository,
+                spec,
+                countSpec,
+                specParams.PageIndex,
+                specParams.PageSize
+            );
         }
 
-        // GET: api/products/5
+        /// <summary>
+        /// Get a specific product by ID
+        /// </summary>
         [HttpGet("{id}")]
+        [SwaggerOperation(Summary = "Get product by ID")]
+        [SwaggerResponse(200, "Successfully retrieved product", typeof(Product))]
+        [SwaggerResponse(404, "Product not found")]
         public async Task<ActionResult<Product>> GetProduct(int id)
         {
             var product = await _repository.GetByIdAsync(id);
 
             if (product == null)
             {
-                return NotFound();
+                return NotFound(new { message = $"Product with ID {id} not found" });
             }
 
             return Ok(product);
         }
 
-        // GET: api/products/brands
+        /// <summary>
+        /// Get all distinct product brands
+        /// </summary>
         [HttpGet("brands")]
+        [SwaggerOperation(Summary = "Get all brands")]
+        [SwaggerResponse(200, "Successfully retrieved brands", typeof(IEnumerable<string>))]
         public async Task<ActionResult<IEnumerable<string>>> GetBrands()
         {
             var spec = new ProductBrandSpecification();
@@ -51,8 +66,12 @@ namespace API.Controllers
             return Ok(brands);
         }
 
-        // GET: api/products/types
+        /// <summary>
+        /// Get all distinct product types
+        /// </summary>
         [HttpGet("types")]
+        [SwaggerOperation(Summary = "Get all types")]
+        [SwaggerResponse(200, "Successfully retrieved types", typeof(IEnumerable<string>))]
         public async Task<ActionResult<IEnumerable<string>>> GetTypes()
         {
             var spec = new ProductTypeSpecification();
@@ -60,39 +79,55 @@ namespace API.Controllers
             return Ok(types);
         }
 
-        // POST: api/products
+        /// <summary>
+        /// Create a new product
+        /// </summary>
         [HttpPost]
-        public async Task<ActionResult<Product>> CreateProduct(Product product)
+        [SwaggerOperation(Summary = "Create a new product")]
+        [SwaggerResponse(201, "Product successfully created", typeof(Product))]
+        [SwaggerResponse(400, "Invalid product data")]
+        public async Task<ActionResult<Product>> CreateProduct([FromBody] Product product)
         {
             var createdProduct = await _repository.AddAsync(product);
             return CreatedAtAction(nameof(GetProduct), new { id = createdProduct.Id }, createdProduct);
         }
 
-        // PUT: api/products/5
+        /// <summary>
+        /// Update an existing product
+        /// </summary>
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateProduct(int id, Product product)
+        [SwaggerOperation(Summary = "Update a product")]
+        [SwaggerResponse(204, "Product successfully updated")]
+        [SwaggerResponse(400, "Invalid product data")]
+        [SwaggerResponse(404, "Product not found")]
+        public async Task<IActionResult> UpdateProduct(int id, [FromBody] Product product)
         {
             if (id != product.Id)
             {
-                return BadRequest();
+                return BadRequest(new { message = "ID in URL does not match ID in request body" });
             }
 
             if (!await _repository.ExistsAsync(id))
             {
-                return NotFound();
+                return NotFound(new { message = $"Product with ID {id} not found" });
             }
 
             await _repository.UpdateAsync(product);
             return NoContent();
         }
 
-        // DELETE: api/products/5
+        /// <summary>
+        /// Delete a product
+        /// </summary>
         [HttpDelete("{id}")]
+        [SwaggerOperation(Summary = "Delete a product")]
+        [SwaggerResponse(204, "Product successfully deleted")]
+        [SwaggerResponse(404, "Product not found")]
         public async Task<IActionResult> DeleteProduct(int id)
         {
             if (!await _repository.ExistsAsync(id))
             {
-                return NotFound();
+                return NotFound(new { message = $"Product with ID {id} not found" });
             }
 
             await _repository.DeleteAsync(id);

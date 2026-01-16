@@ -10,5 +10,8 @@ namespace Core.Specifications
         Expression<Func<T, object>>? OrderByDescending { get; }
         Expression<Func<T, object>>? Select { get; }
         bool IsDistinct { get; }
+        int Take { get; }
+        int Skip { get; }
+        bool IsPagingEnabled { get; }
     }
 }

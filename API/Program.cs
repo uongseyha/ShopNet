@@ -13,7 +13,10 @@ builder.Services.AddDbContext<StoreContext>(options =>
 
 // Register generic repository
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
-builder.Services.AddScoped<IProductRepository, ProductRepository>();
+
+// Add Swagger
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
@@ -26,10 +29,7 @@ using (var scope = app.Services.CreateScope())
     
     try
     {
-        // Ensure database is created
         await context.Database.MigrateAsync();
-        
-        // Seed data if needed
         await StoreContextSeed.SeedAsync(context, logger);
     }
     catch (Exception ex)
@@ -38,11 +38,21 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
-// Configure the HTTP request pipeline.
+// Configure Swagger
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI(c =>
+    {
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "ShopNet API");
+        c.RoutePrefix = string.Empty; // Swagger at root URL
+    });
+
+    app.UseDeveloperExceptionPage();
+}
+
 app.UseHttpsRedirection();
-
 app.UseAuthorization();
-
 app.MapControllers();
 
 app.Run();
