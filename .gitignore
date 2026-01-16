@@ -377,3 +377,4 @@ FodyWeavers.xsd
 # macOS
 .DS_Store
 API/appsettings.json
+Client/package-lock.json
