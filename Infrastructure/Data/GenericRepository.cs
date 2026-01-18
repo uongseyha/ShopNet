@@ -1,7 +1,6 @@
 using Core.Entities;
 using Microsoft.EntityFrameworkCore;
 using Core.Interfaces;
-using Core.Specifications;
 
 namespace Infrastructure.Data
 {

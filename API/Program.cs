@@ -7,28 +7,15 @@ using API.Errors;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
 builder.Services.AddControllers();
-
-// Add StoreContext as a service    
+   
 builder.Services.AddDbContext<StoreContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// Register generic repository
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 
-// Configure CORS
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("CorsPolicy", policy =>
-    {
-        policy.AllowAnyHeader()
-              .AllowAnyMethod()
-              .WithOrigins("http://localhost:4200", "https://localhost:4200");
-    });
-});
+builder.Services.AddCors();
 
-// Configure API behavior for validation errors
 builder.Services.Configure<ApiBehaviorOptions>(options =>
 {
     options.InvalidModelStateResponseFactory = actionContext =>
@@ -45,13 +32,11 @@ builder.Services.Configure<ApiBehaviorOptions>(options =>
     };
 });
 
-// Add Swagger
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-// Seed database
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
@@ -69,24 +54,26 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
-// Add exception middleware (must be early in the pipeline)
 app.UseMiddleware<ExceptionMiddleware>();
 
-// Handle non-existing routes
+app.UseCors(x => x
+    .AllowAnyHeader()
+    .AllowAnyMethod()
+    .AllowCredentials()
+    .WithOrigins("http://localhost:4200", "https://localhost:4200"));
+
 app.UseStatusCodePagesWithReExecute("/errors/{0}");
 
-// Configure Swagger
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI(c =>
     {
         c.SwaggerEndpoint("/swagger/v1/swagger.json", "ShopNet API");
-        c.RoutePrefix = string.Empty; // Swagger at root URL
+        c.RoutePrefix = string.Empty;
     });
 }
 
-// Enable CORS (must be after UseRouting if you use it, and before UseAuthorization)
 app.UseCors("CorsPolicy");
 
 app.UseHttpsRedirection();

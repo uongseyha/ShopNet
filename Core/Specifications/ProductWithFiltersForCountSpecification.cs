@@ -10,8 +10,8 @@ namespace Core.Specifications
                  x.Name.ToLower().Contains(specParams.Search) ||
                  x.Brand.ToLower().Contains(specParams.Search) ||
                  x.Type.ToLower().Contains(specParams.Search)) &&
-                (string.IsNullOrWhiteSpace(specParams.Brand) || x.Brand == specParams.Brand) &&
-                (string.IsNullOrWhiteSpace(specParams.Type) || x.Type == specParams.Type)
+                (specParams.Brands.Count == 0 || specParams.Brands.Contains(x.Brand.ToLower())) &&
+                (specParams.Types.Count == 0 || specParams.Types.Contains(x.Type.ToLower()))
             )
         {
         }

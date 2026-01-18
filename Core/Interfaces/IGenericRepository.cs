@@ -1,5 +1,3 @@
-using Core.Specifications;
-
 namespace Core.Interfaces
 {
     public interface IGenericRepository<T> where T : class
