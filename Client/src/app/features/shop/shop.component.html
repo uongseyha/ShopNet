@@ -1,44 +1,47 @@
-<div class="flex flex-col gap-3">
-  <div class="flex justify-between items-center gap-4">
-    <mat-form-field appearance="outline" class="flex-1">
-      <mat-label>Search products</mat-label>
-      <input 
-        matInput 
-        [(ngModel)]="searchTerm" 
-        (keyup.enter)="onSearch()"
-        placeholder="Search by name...">
-      <mat-icon matSuffix class="cursor-pointer" (click)="onSearch()">search</mat-icon>
-    </mat-form-field>
+@if (products() && products()!.count > 0) {
+  <div class="flex flex-col gap-3">
+    <div class="flex justify-between items-center gap-4">
+      <mat-form-field appearance="outline" class="flex-1">
+        <mat-label>Search products</mat-label>
+        <input
+          matInput
+          [(ngModel)]="searchTerm"
+          (keyup.enter)="onSearch()"
+          placeholder="Search by name..."
+        />
+        <mat-icon matSuffix class="cursor-pointer" (click)="onSearch()">search</mat-icon>
+      </mat-form-field>
 
-    <div class="flex gap-3">
-      <button mat-stroked-button (click)="openFiltersDialog()">
-        <mat-icon>filter_list</mat-icon>
-        Filters
-      </button>
+      <div class="flex gap-3">
+        <button mat-stroked-button (click)="openFiltersDialog()">
+          <mat-icon>filter_list</mat-icon>
+          Filters
+        </button>
 
-      <button mat-stroked-button [matMenuTriggerFor]="sortMenu">
-        <mat-icon>swap_vert</mat-icon>
-        Sort
-      </button>
-      <mat-menu #sortMenu="matMenu">
-        @for (option of sortOptions; track option.value) {
-          <button mat-menu-item (click)="onSortChange(option.value)">
-            {{ option.name }}
-          </button>
-        }
-      </mat-menu>
+        <button mat-stroked-button [matMenuTriggerFor]="sortMenu">
+          <mat-icon>swap_vert</mat-icon>
+          Sort
+        </button>
+        <mat-menu #sortMenu="matMenu">
+          @for (option of sortOptions; track option.value) {
+            <button mat-menu-item (click)="onSortChange(option.value)">
+              {{ option.name }}
+            </button>
+          }
+        </mat-menu>
+      </div>
     </div>
-  </div>
 
-  <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-    @for (product of allProducts(); track product.id) {
-      <app-product-items [product]="product"></app-product-items>
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+      @for (product of allProducts(); track product.id) {
+        <app-product-items [product]="product"></app-product-items>
+      }
+    </div>
+
+    @if (loading()) {
+      <div class="flex justify-center w-full mt-4">
+        <mat-spinner diameter="40"></mat-spinner>
+      </div>
     }
   </div>
-
-  @if (loading()) {
-    <div class="flex justify-center w-full mt-4">
-      <mat-spinner diameter="40"></mat-spinner>
-    </div>
-  }
-</div>
+}

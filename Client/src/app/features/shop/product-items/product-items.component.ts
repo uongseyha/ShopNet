@@ -4,10 +4,11 @@ import { Product } from '../../../shared/models/product';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIcon } from "@angular/material/icon";
 import { CommonModule } from '@angular/common';
+import { RouterLink } from "@angular/router";
 
 @Component({
   selector: 'app-product-items',
-  imports: [MatCardModule, MatButtonModule, MatIcon, CommonModule],
+  imports: [MatCardModule, MatButtonModule, MatIcon, CommonModule, RouterLink],
   templateUrl: './product-items.component.html',
   styleUrl: './product-items.component.css',
 })

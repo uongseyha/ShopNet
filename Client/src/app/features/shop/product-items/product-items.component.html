@@ -1,9 +1,18 @@
 @if (product) {
-<mat-card appearance="raised" class="flex flex-col h-full">
-    <img src="{{product.pictureUrl}}" class="w-full object-cover rounded-t-lg" alt="image of {{product.name}}">
+  <mat-card appearance="raised" class="flex flex-col h-full product-card">
+    <img
+      src="{{ product.pictureUrl }}"
+      [routerLink]="'/shop/' + product.id"
+      class="w-full object-cover rounded-t-lg"
+      alt="image of {{ product.name }}"
+    />
     <mat-card-content class="mt-2 flex flex-col gap-2">
-      <h2 class="text-sm font-semibold uppercase line-clamp-2 leading-[1.4] min-h-[2.8em] overflow-hidden">{{product.name}}</h2>
-      <p class="font-light">{{product.price | currency}}</p>
+      <h2
+        class="text-sm font-semibold uppercase line-clamp-2 leading-[1.4] min-h-[2.8em] overflow-hidden"
+      >
+        {{ product.name }}
+      </h2>
+      <p class="font-light">{{ product.price | currency }}</p>
     </mat-card-content>
     <mat-card-actions class="mt-auto" (click)="$event.stopPropagation()">
       <button mat-stroked-button class="w-full">
@@ -11,5 +20,5 @@
         Add to cart
       </button>
     </mat-card-actions>
-</mat-card>
+  </mat-card>
 }
