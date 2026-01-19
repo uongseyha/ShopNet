@@ -4,7 +4,7 @@ import { MatButton } from "@angular/material/button";
 import { MatBadge } from "@angular/material/badge";
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { MatProgressBar } from "@angular/material/progress-bar";
-// import { BusyService } from '../../core/services/busy.service';
+import { BusyService } from '../../core/services/busy.service';
 // import { CartService } from '../../core/services/cart.service';
 // import { AccountService } from '../../core/services/account.service';
 import { MatDivider } from '@angular/material/divider';
@@ -30,7 +30,7 @@ import { MatMenuTrigger, MatMenu, MatMenuItem } from '@angular/material/menu';
   styleUrls: ['./header.component.css']
 })
 export class HeaderComponent {
-  // busyService = inject(BusyService);
+  busyService = inject(BusyService);
   // cartService = inject(CartService);
   // accountService = inject(AccountService);
   private router = inject(Router);

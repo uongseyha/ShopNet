@@ -1,0 +1,16 @@
+<div class="container mx-auto mt-10 px-4">
+  <div class="bg-red-100 border border-red-400 text-red-700 px-6 py-4 rounded-lg shadow-md" role="alert">
+    <h4 class="text-2xl font-bold mb-2">Internal Server Error</h4>
+    <hr class="border-red-300 my-3">
+    <p class="mb-0">{{ error?.message || 'An unexpected error occurred' }}</p>
+    <div *ngIf="error?.details" class="mt-4">
+      <h5 class="text-lg font-semibold mb-2">Error Details:</h5>
+      <pre class="text-red-600 bg-red-50 p-3 rounded overflow-x-auto">{{ error.details }}</pre>
+    </div>
+  </div>
+  <button 
+    class="mt-6 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-lg shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-300" 
+    routerLink="/">
+    Go to Home
+  </button>
+</div>
