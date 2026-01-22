@@ -32,8 +32,8 @@
                 mat-icon-button 
                 (click)="decrementQuantity()"
                 [disabled]="quantity() <= 1"
-                class="!flex !size-9 !min-h-9 !min-w-9 !items-center !justify-center !rounded-md !bg-transparent !transition-colors hover:!bg-white disabled:!opacity-40">
-                <mat-icon class="!flex !items-center !justify-center !text-lg !text-gray-700">remove</mat-icon>
+                class="flex! size-9! min-h-9! min-w-9! items-center! justify-center! rounded-md! bg-transparent! transition-colors! hover:bg-white! disabled:opacity-40!">
+                <mat-icon class="flex! items-center! justify-center! text-lg! text-gray-700!">remove</mat-icon>
               </button>
               <input 
                 matInput
@@ -48,8 +48,8 @@
                 mat-icon-button 
                 (click)="incrementQuantity()"
                 [disabled]="quantity() >= (product()?.quantityInStock || 0)"
-                class="!flex !size-9 !min-h-9 !min-w-9 !items-center !justify-center !rounded-md !bg-transparent !transition-colors hover:!bg-white disabled:!opacity-40">
-                <mat-icon class="!flex !items-center !justify-center !text-lg !text-gray-700">add</mat-icon>
+                class="flex! size-9! min-h-9! min-w-9! items-center! justify-center! rounded-md! bg-transparent! transition-colors! hover:bg-white! disabled:opacity-40!">
+                <mat-icon class="flex! items-center! justify-center! text-lg! text-gray-700!">add</mat-icon>
               </button>
             </div>
             <span class="text-sm text-gray-500">
@@ -62,7 +62,7 @@
             mat-raised-button 
             (click)="addToCart()"
             [disabled]="addingToCart() || quantity() < 1 || quantity() > (product()?.quantityInStock || 0)"
-            class="!h-14 !w-full !bg-blue-600 !text-lg !font-bold !text-white hover:!bg-blue-700 disabled:!bg-gray-300"
+            class="h-14! w-full! bg-blue-600! text-lg! font-bold! text-white! hover:bg-blue-700! disabled:bg-gray-300!"
           >
             <mat-icon class="mr-2">{{ addingToCart() ? 'hourglass_empty' : 'shopping_cart' }}</mat-icon>
             {{ addingToCart() ? 'Adding...' : 'Add To Cart' }}
