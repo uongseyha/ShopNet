@@ -23,19 +23,49 @@
 
         <mat-divider></mat-divider>
 
-        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
-          <mat-form-field appearance="outline" class="w-full sm:w-32 !mb-0" subscriptSizing="dynamic">
-            <mat-label>Quantity</mat-label>
-            <input matInput min="1" value="1" type="number" />
-          </mat-form-field>
+        <div class="flex flex-col gap-4">
+          <!-- Quantity Controls -->
+          <div class="flex items-center gap-4">
+            <label class="text-sm font-medium text-gray-600">Quantity:</label>
+            <div class="flex items-center gap-1 rounded-lg border border-gray-200 bg-gray-50 p-1">
+              <button 
+                mat-icon-button 
+                (click)="decrementQuantity()"
+                [disabled]="quantity() <= 1"
+                class="!flex !size-9 !min-h-9 !min-w-9 !items-center !justify-center !rounded-md !bg-transparent !transition-colors hover:!bg-white disabled:!opacity-40">
+                <mat-icon class="!flex !items-center !justify-center !text-lg !text-gray-700">remove</mat-icon>
+              </button>
+              <input 
+                matInput
+                type="number" 
+                min="1"
+                [max]="product()?.quantityInStock"
+                [value]="quantity()"
+                (input)="updateQuantity($any($event.target).value)"
+                class="w-16 border-none bg-transparent px-2 py-1 text-center text-base font-bold text-gray-900 outline-none"
+              />
+              <button 
+                mat-icon-button 
+                (click)="incrementQuantity()"
+                [disabled]="quantity() >= (product()?.quantityInStock || 0)"
+                class="!flex !size-9 !min-h-9 !min-w-9 !items-center !justify-center !rounded-md !bg-transparent !transition-colors hover:!bg-white disabled:!opacity-40">
+                <mat-icon class="!flex !items-center !justify-center !text-lg !text-gray-700">add</mat-icon>
+              </button>
+            </div>
+            <span class="text-sm text-gray-500">
+              {{ product()?.quantityInStock }} available
+            </span>
+          </div>
 
+          <!-- Add to Cart Button -->
           <button 
             mat-raised-button 
-            color="primary" 
-            class="h-14 w-full sm:flex-1 !text-base"
+            (click)="addToCart()"
+            [disabled]="addingToCart() || quantity() < 1 || quantity() > (product()?.quantityInStock || 0)"
+            class="!h-14 !w-full !bg-blue-600 !text-lg !font-bold !text-white hover:!bg-blue-700 disabled:!bg-gray-300"
           >
-            <mat-icon class="mr-2">shopping_cart</mat-icon>
-            Add To Cart
+            <mat-icon class="mr-2">{{ addingToCart() ? 'hourglass_empty' : 'shopping_cart' }}</mat-icon>
+            {{ addingToCart() ? 'Adding...' : 'Add To Cart' }}
           </button>
         </div>
 

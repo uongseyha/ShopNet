@@ -9,21 +9,17 @@ import { BusyService } from '../../core/services/busy.service';
 // import { AccountService } from '../../core/services/account.service';
 import { MatDivider } from '@angular/material/divider';
 import { MatMenuTrigger, MatMenu, MatMenuItem } from '@angular/material/menu';
+import { CartService } from '../../core/services/cart.service';
 // import { IsAdmin } from '../../shared/directives/is-admin';
 
 @Component({
   selector: 'app-header',
   imports: [
     MatIcon,
-    MatButton,
     MatBadge,
     RouterLink,
     RouterLinkActive,
     MatProgressBar,
-    MatMenuTrigger,
-    MatMenu,
-    MatDivider,
-    MatMenuItem
     //,IsAdmin 
   ],
   templateUrl: './header.component.html',
@@ -31,9 +27,13 @@ import { MatMenuTrigger, MatMenu, MatMenuItem } from '@angular/material/menu';
 })
 export class HeaderComponent {
   busyService = inject(BusyService);
-  // cartService = inject(CartService);
+  cartService = inject(CartService);
   // accountService = inject(AccountService);
   private router = inject(Router);
+
+  getCartItemCount() {
+    return this.cartService.itemCount();
+  }
 
   logout() {
     // this.accountService.logout().subscribe({

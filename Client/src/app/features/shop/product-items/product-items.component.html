@@ -14,7 +14,7 @@
       </h2>
       <p class="font-light">{{ product.price | currency }}</p>
     </mat-card-content>
-    <mat-card-actions class="mt-auto" (click)="$event.stopPropagation()">
+    <mat-card-actions class="mt-auto" (click)="addItemToCart(product)">
       <button mat-stroked-button class="w-full">
         <mat-icon>add_shopping_cart</mat-icon>
         Add to cart

@@ -1,0 +1,88 @@
+<div class="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50/30 to-gray-50">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-12">
+    @if (cartService.cart()) {
+      <!-- Page Header -->
+      <div class="mb-8">
+        <h1 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-2">
+          Shopping Cart
+        </h1>
+        <p class="text-gray-600 text-sm sm:text-base">
+          {{ cartService.itemCount() }} {{ cartService.itemCount() === 1 ? 'item' : 'items' }} in your cart
+          @if (cartService.totals()) {
+            <span class="ml-2 text-blue-600 font-semibold">• {{ cartService.totals()!.total | currency }}</span>
+          }
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
+        <!-- Cart Items Section -->
+        <div class="lg:col-span-2 space-y-4">
+          <!-- Mobile Quick Summary -->
+          <div class="lg:hidden bg-white rounded-2xl shadow-sm p-4 border border-gray-100 mb-6">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-4">
+                <div class="flex flex-col">
+                  <span class="text-xs text-gray-500 uppercase tracking-wide">Items</span>
+                  <strong class="text-2xl font-bold text-gray-900">{{ cartService.itemCount() }}</strong>
+                </div>
+                <div class="h-12 w-px bg-gray-200"></div>
+                <div class="flex flex-col">
+                  <span class="text-xs text-gray-500 uppercase tracking-wide">Total</span>
+                  <strong class="text-2xl font-bold text-blue-600">{{ cartService.totals()?.total | currency }}</strong>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Cart Items List -->
+          @for (item of cartService.cart()!.items; track item.productId) {
+            <app-cart-item [item]="item" />
+          } @empty {
+            <div class="text-center py-16 bg-white rounded-2xl shadow-sm border border-gray-100">
+              <div class="flex flex-col items-center gap-4">
+                <div class="w-24 h-24 rounded-full bg-gray-100 flex items-center justify-center">
+                  <mat-icon class="!text-5xl !w-12 !h-12 text-gray-400">shopping_cart</mat-icon>
+                </div>
+                <div>
+                  <h3 class="text-xl font-semibold text-gray-700 mb-1">Your cart is empty</h3>
+                  <p class="text-gray-500">Add some items to get started</p>
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+
+        <!-- Order Summary Sidebar -->
+        @if (cartService.cart()!.items.length > 0 && cartService.totals()) {
+          <div class="lg:col-span-1">
+            <app-order-summary 
+              [itemCount]="cartService.itemCount()!"
+              [subtotal]="cartService.totals()!.subtotal"
+              [discount]="cartService.totals()!.discount"
+              [shipping]="cartService.totals()!.shipping"
+              [total]="cartService.totals()!.total"
+              [appliedVoucher]="getAppliedVoucher()"
+              (checkout)="onCheckout()"
+              (continueShopping)="goToShop()"
+              (applyVoucher)="onApplyVoucher($event)"
+              (removeVoucher)="onRemoveVoucher()" />
+          </div>
+        }
+      </div>
+    } @else {
+      <!-- Empty State -->
+      <div class="flex items-center justify-center min-h-[60vh]">
+        <div class="text-center bg-white rounded-3xl shadow-xl p-12 max-w-md border border-gray-100">
+          <div class="w-32 h-32 mx-auto mb-6 rounded-full bg-gradient-to-br from-blue-100 to-indigo-100 flex items-center justify-center">
+            <mat-icon class="!text-7xl !w-16 !h-16 text-blue-600">shopping_cart</mat-icon>
+          </div>
+          <h2 class="text-3xl font-bold text-gray-900 mb-3">Your cart is empty</h2>
+          <p class="text-gray-600 text-lg mb-8">Discover amazing products and start shopping!</p>
+          <button mat-raised-button color="primary" (click)="goToShop()" class="!px-8 !py-3 !text-base !rounded-xl">
+            Start Shopping
+          </button>
+        </div>
+      </div>
+    }
+  </div>
+</div>

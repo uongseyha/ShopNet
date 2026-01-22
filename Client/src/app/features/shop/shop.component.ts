@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal, HostListener } from '@angular/core';
+import { Component, inject, OnInit, signal, HostListener, effect } from '@angular/core';
 import { Product } from '../../shared/models/product';
 import { ShopParams } from '../../shared/models/shopParams';
 import { ShopService } from '../../core/services/shop.service';
@@ -13,6 +13,8 @@ import { Pagination } from '../../shared/models/pagination';
 import { FormsModule } from '@angular/forms';
 import { MatFormField, MatInput, MatLabel } from '@angular/material/input';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
+import { Subject } from 'rxjs';
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
 @Component({
   selector: 'app-shop',
@@ -40,6 +42,7 @@ export class ShopComponent implements OnInit {
   allProducts = signal<Product[]>([]);
   loading = signal<boolean>(false);
   searchTerm = '';
+  private searchSubject = new Subject<string>();
   shopParams: ShopParams = {
     brands: [],
     types: [],
@@ -52,6 +55,17 @@ export class ShopComponent implements OnInit {
     { name: 'Price: Low-High', value: 'priceAsc' },
     { name: 'Price: High-Low', value: 'priceDesc' }
   ];
+  
+  constructor() {
+    this.searchSubject.pipe(
+      debounceTime(500),
+      distinctUntilChanged()
+    ).subscribe(searchTerm => {
+      this.shopParams.search = searchTerm;
+      this.shopParams.pageNumber = 1;
+      this.getProducts();
+    });
+  }
   
   ngOnInit(): void {
     this.initialzeShop();
@@ -119,9 +133,7 @@ export class ShopComponent implements OnInit {
   }
 
   onSearch() {
-    this.shopParams.search = this.searchTerm;
-    this.shopParams.pageNumber = 1;
-    this.getProducts();
+    this.searchSubject.next(this.searchTerm);
   }
 
   @HostListener('window:scroll', [])

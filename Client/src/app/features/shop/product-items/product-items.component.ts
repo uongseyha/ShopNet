@@ -1,4 +1,5 @@
-import { Component, Input } from '@angular/core';
+import { CartService } from './../../../core/services/cart.service';
+import { Component, inject, Input } from '@angular/core';
 import { MatCard, MatCardModule } from "@angular/material/card";
 import { Product } from '../../../shared/models/product';
 import { MatButtonModule } from '@angular/material/button';
@@ -14,4 +15,10 @@ import { RouterLink } from "@angular/router";
 })
 export class ProductItemsComponent {
   @Input() product!: Product;
+  CartService = inject(CartService);
+
+  addItemToCart(product: Product) {
+    this.CartService.addItemToCart(product);
+  }
+
 }

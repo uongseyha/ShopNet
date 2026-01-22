@@ -1,0 +1,103 @@
+<div class="bg-white rounded-2xl shadow-lg p-6 lg:p-8 border border-gray-100 lg:sticky lg:top-24 space-y-6">
+  <!-- Summary Header -->
+  <div class="pb-4 border-b border-gray-200">
+    <h2 class="text-2xl font-bold text-gray-900">Order Summary</h2>
+  </div>
+
+  <!-- Summary Details -->
+  <div class="space-y-4">
+    <!-- Items Count -->
+    <div class="flex justify-between items-center py-3 border-b border-gray-100">
+      <span class="text-gray-600 font-medium">Total Items</span>
+      <div class="flex items-center gap-2">
+        <span class="text-2xl font-bold text-gray-900">{{ itemCount() }}</span>
+      </div>
+    </div>
+
+    <!-- Subtotal -->
+    <div class="flex justify-between items-center py-3 border-b border-gray-100">
+      <span class="text-gray-600 font-medium">Subtotal</span>
+      <span class="text-xl font-semibold text-gray-900">{{ subtotal() | currency }}</span>
+    </div>
+
+    <!-- Discount (if applied) -->
+    @if (discount() > 0) {
+      <div class="flex justify-between items-center py-3 border-b border-gray-100 text-green-600">
+        <span class="font-medium">Discount</span>
+        <span class="text-lg font-semibold">-{{ discount() | currency }}</span>
+      </div>
+    }
+
+    <!-- Shipping Estimate -->
+    <div class="flex justify-between items-center py-3 border-b border-gray-100">
+      <span class="text-gray-600 font-medium">Shipping</span>
+      @if (shipping() > 0) {
+        <span class="text-lg font-semibold text-gray-900">{{ shipping() | currency }}</span>
+      } @else {
+        <span class="text-sm text-green-600 font-semibold">FREE</span>
+      }
+    </div>
+
+    <!-- Total -->
+    <div class="flex justify-between items-center py-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl px-4 border border-blue-100">
+      <span class="text-lg font-bold text-gray-900">Total</span>
+      <span class="text-3xl font-bold text-blue-600">{{ total() | currency }}</span>
+    </div>
+  </div>
+
+  <!-- Voucher Code Section -->
+  <div class="py-4 border-t border-gray-100">
+    @if (appliedVoucher()) {
+      <div class="flex items-center justify-between gap-2 p-3 bg-green-50 rounded-lg border border-green-200">
+        <div class="flex items-center gap-2 flex-1">
+          <mat-icon class="!text-green-600 !text-xl">local_offer</mat-icon>
+          <div class="flex flex-col">
+            <span class="text-xs text-gray-600">Voucher Applied</span>
+            <span class="font-semibold text-green-700">{{ appliedVoucher() }}</span>
+          </div>
+        </div>
+        <button mat-icon-button 
+                (click)="onRemoveVoucher()"
+                class="!w-8 !h-8 !text-red-600">
+          <mat-icon class="!text-base">close</mat-icon>
+        </button>
+      </div>
+    } @else {
+      <div class="space-y-2">
+        <label class="text-sm font-medium text-gray-600">Have a voucher code?</label>
+        <div class="flex gap-2">
+          <mat-form-field appearance="outline" class="!flex-1">
+            <input matInput 
+                   placeholder="Enter code" 
+                   [(ngModel)]="voucherCode"
+                   (keyup.enter)="onApplyVoucher()"
+                   class="!text-sm ml-1" />
+          </mat-form-field>
+          <button mat-raised-button 
+                  color="primary"
+                  (click)="onApplyVoucher()"
+                  [disabled]="!voucherCode().trim()"
+                  class="!h-14 !px-6 !text-sm !font-semibold !whitespace-nowrap">
+            Apply
+          </button>
+        </div>
+      </div>
+    }
+  </div>
+
+  <!-- Checkout Button -->
+  <button mat-raised-button 
+          color="primary"
+          (click)="checkout.emit()"
+          class="!w-full !py-4 !text-lg !font-bold !rounded-xl !shadow-lg hover:!shadow-xl !transition-all !duration-300">
+    <mat-icon class="mr-2">lock</mat-icon>
+    Proceed to Checkout
+  </button>
+
+  <!-- Continue Shopping Link -->
+  <button mat-button 
+          (click)="continueShopping.emit()" 
+          class="!w-full !text-blue-600 hover:!bg-blue-50 !rounded-lg !transition-colors">
+    Continue Shopping
+  </button>
+</div>
