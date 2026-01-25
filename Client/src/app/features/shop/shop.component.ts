@@ -58,12 +58,14 @@ export class ShopComponent implements OnInit {
   
   constructor() {
     this.searchSubject.pipe(
-      debounceTime(500),
+      debounceTime(1000),
       distinctUntilChanged()
     ).subscribe(searchTerm => {
-      this.shopParams.search = searchTerm;
-      this.shopParams.pageNumber = 1;
-      this.getProducts();
+      if (searchTerm.length >= 3 || searchTerm.length === 0) {
+        this.shopParams.search = searchTerm;
+        this.shopParams.pageNumber = 1;
+        this.getProducts();
+      }
     });
   }
   

@@ -5,13 +5,14 @@ import { tap } from 'rxjs/operators';
 import { Product } from '../../shared/models/product';
 import { Pagination } from '../../shared/models/pagination';
 import { ShopParams } from '../../shared/models/shopParams';
+import { environment } from '../../../environments/environment.development';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ShopService {
   private http = inject(HttpClient);
-  private baseUrl = '/api/products';
+  private baseUrl = environment.baseUrl + 'products';
   brands: string[] = [];
   types: string[] = [];
 

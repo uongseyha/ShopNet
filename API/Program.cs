@@ -9,6 +9,11 @@ using StackExchange.Redis;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Configure logging to include console output
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole();
+builder.Logging.AddDebug();
+
 builder.Services.AddControllers();
    
 builder.Services.AddDbContext<StoreContext>(options =>
@@ -26,6 +31,18 @@ builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepositor
 builder.Services.AddScoped<ICartService, CartService>();
 
 builder.Services.AddCors();
+
+//For published
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAngular",
+        policy =>
+        {
+            policy.WithOrigins("https://shopnet2k6.azurewebsites.net")
+                  .AllowAnyHeader()
+                  .AllowAnyMethod();
+        });
+});
 
 builder.Services.Configure<ApiBehaviorOptions>(options =>
 {
@@ -46,23 +63,30 @@ builder.Services.Configure<ApiBehaviorOptions>(options =>
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-
 var app = builder.Build();
+
+var logger = app.Services.GetRequiredService<ILogger<Program>>();
+logger.LogInformation("Application starting up...");
 
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
     var context = services.GetRequiredService<StoreContext>();
-    var logger = services.GetRequiredService<ILogger<Program>>();
+    var scopedLogger = services.GetRequiredService<ILogger<Program>>();
     
     try
     {
+        scopedLogger.LogInformation("Starting database migration...");
         await context.Database.MigrateAsync();
-        await StoreContextSeed.SeedAsync(context, logger);
+        scopedLogger.LogInformation("Database migration completed successfully");
+        
+        scopedLogger.LogInformation("Starting database seeding...");
+        await StoreContextSeed.SeedAsync(context, scopedLogger);
+        scopedLogger.LogInformation("Database seeding completed successfully");
     }
     catch (Exception ex)
     {
-        logger.LogError(ex, "An error occurred during migration or seeding");
+        scopedLogger.LogError(ex, "An error occurred during migration or seeding");
     }
 }
 
@@ -73,6 +97,8 @@ app.UseCors(x => x
     .AllowAnyMethod()
     .AllowCredentials()
     .WithOrigins("http://localhost:4200", "https://localhost:4200"));
+
+app.UseCors("AllowAngular");
 
 app.UseStatusCodePagesWithReExecute("/errors/{0}");
 
@@ -90,6 +116,13 @@ app.UseCors("CorsPolicy");
 
 app.UseHttpsRedirection();
 app.UseAuthorization();
+
+app.UseDefaultFiles();
+app.UseStaticFiles();
+
 app.MapControllers();
+app.MapFallbackToController("Index", "Fallback");
+
+logger.LogInformation("Application started successfully");
 
 app.Run();

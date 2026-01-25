@@ -1,3 +1,4 @@
+using System.Reflection;
 using System.Text.Json;
 using Core.Entities;
 using Microsoft.Extensions.Logging;
@@ -10,10 +11,12 @@ namespace Infrastructure.Data
         {
             try
             {
+                var path= Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+
                 // Check if products already exist
                 if (!context.Products.Any())
                 {
-                    var productsData = await File.ReadAllTextAsync("../Infrastructure/Data/SeedData/products.json");
+                    var productsData = await File.ReadAllTextAsync(path + @"/Data/SeedData/products.json");
                     
                     var products = JsonSerializer.Deserialize<List<Product>>(productsData, new JsonSerializerOptions
                     {
