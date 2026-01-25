@@ -30,19 +30,18 @@ builder.Services.AddSingleton<IConnectionMultiplexer>(config =>
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 builder.Services.AddScoped<ICartService, CartService>();
 
-// Configure CORS for both development and production
-var allowedOrigins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>() 
-    ?? new[] { "http://localhost:4200", "https://localhost:4200" };
+builder.Services.AddCors();
 
+//For published
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("CorsPolicy", policy =>
-    {
-        policy.WithOrigins(allowedOrigins)
-              .AllowAnyHeader()
-              .AllowAnyMethod()
-              .AllowCredentials();
-    });
+    options.AddPolicy("AllowAngular",
+        policy =>
+        {
+            policy.WithOrigins("https://shopnet2k6.azurewebsites.net")
+                  .AllowAnyHeader()
+                  .AllowAnyMethod();
+        });
 });
 
 builder.Services.Configure<ApiBehaviorOptions>(options =>
@@ -93,8 +92,13 @@ using (var scope = app.Services.CreateScope())
 
 app.UseMiddleware<ExceptionMiddleware>();
 
-// Apply CORS policy
-app.UseCors("CorsPolicy");
+app.UseCors(x => x
+    .AllowAnyHeader()
+    .AllowAnyMethod()
+    .AllowCredentials()
+    .WithOrigins("http://localhost:4200", "https://localhost:4200"));
+
+app.UseCors("AllowAngular");
 
 app.UseStatusCodePagesWithReExecute("/errors/{0}");
 
@@ -108,11 +112,15 @@ if (app.Environment.IsDevelopment())
     });
 }
 
+app.UseCors("CorsPolicy");
+
 app.UseHttpsRedirection();
 app.UseAuthorization();
-app.MapControllers();
 
-// Fallback to index.html for client-side routing
+app.UseDefaultFiles();
+app.UseStaticFiles();
+
+app.MapControllers();
 app.MapFallbackToController("Index", "Fallback");
 
 logger.LogInformation("Application started successfully");
