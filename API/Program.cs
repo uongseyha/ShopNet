@@ -110,10 +110,6 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseAuthorization();
-
-app.UseDefaultFiles();
-app.UseStaticFiles();
-
 app.MapControllers();
 
 // Fallback to index.html for client-side routing
