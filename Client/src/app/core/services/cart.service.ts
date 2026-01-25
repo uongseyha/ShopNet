@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Cart, CartItem, Coupon } from '../../shared/models/cart';
 import { Product } from '../../shared/models/product';
 import { firstValueFrom, map, tap } from 'rxjs';
-import { environment } from '../../../environments/environment.development';
+import { environment } from '../../../environments/environment';
 //import { DeliveryMethod } from '../../shared/models/deliveryMethod';
 
 @Injectable({
