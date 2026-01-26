@@ -15,7 +15,8 @@ builder.Logging.AddConsole();
 builder.Logging.AddDebug();
 
 builder.Services.AddControllers();
-   
+
+// Configure DbContext with connection resiliency (retry logic) 
 builder.Services.AddDbContext<StoreContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
