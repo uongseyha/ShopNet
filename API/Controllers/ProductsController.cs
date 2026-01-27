@@ -3,7 +3,6 @@ using Core.Entities;
 using Core.Interfaces;
 using Core.Specifications;
 using Core.Helpers;
-using Swashbuckle.AspNetCore.Annotations;
 
 namespace API.Controllers
 {
@@ -34,13 +33,7 @@ namespace API.Controllers
             );
         }
 
-        /// <summary>
-        /// Get a specific product by ID
-        /// </summary>
         [HttpGet("{id}")]
-        [SwaggerOperation(Summary = "Get product by ID")]
-        [SwaggerResponse(200, "Successfully retrieved product", typeof(Product))]
-        [SwaggerResponse(404, "Product not found")]
         public async Task<ActionResult<Product>> GetProduct(int id)
         {
             var product = await _repository.GetByIdAsync(id);
@@ -53,12 +46,7 @@ namespace API.Controllers
             return Ok(product);
         }
 
-        /// <summary>
-        /// Get all distinct product brands
-        /// </summary>
         [HttpGet("brands")]
-        [SwaggerOperation(Summary = "Get all brands")]
-        [SwaggerResponse(200, "Successfully retrieved brands", typeof(IEnumerable<string>))]
         public async Task<ActionResult<IEnumerable<string>>> GetBrands()
         {
             var spec = new ProductBrandSpecification();
@@ -66,12 +54,7 @@ namespace API.Controllers
             return Ok(brands);
         }
 
-        /// <summary>
-        /// Get all distinct product types
-        /// </summary>
         [HttpGet("types")]
-        [SwaggerOperation(Summary = "Get all types")]
-        [SwaggerResponse(200, "Successfully retrieved types", typeof(IEnumerable<string>))]
         public async Task<ActionResult<IEnumerable<string>>> GetTypes()
         {
             var spec = new ProductTypeSpecification();
@@ -79,27 +62,14 @@ namespace API.Controllers
             return Ok(types);
         }
 
-        /// <summary>
-        /// Create a new product
-        /// </summary>
         [HttpPost]
-        [SwaggerOperation(Summary = "Create a new product")]
-        [SwaggerResponse(201, "Product successfully created", typeof(Product))]
-        [SwaggerResponse(400, "Invalid product data")]
         public async Task<ActionResult<Product>> CreateProduct([FromBody] Product product)
         {
             var createdProduct = await _repository.AddAsync(product);
             return CreatedAtAction(nameof(GetProduct), new { id = createdProduct.Id }, createdProduct);
         }
 
-        /// <summary>
-        /// Update an existing product
-        /// </summary>
         [HttpPut("{id}")]
-        [SwaggerOperation(Summary = "Update a product")]
-        [SwaggerResponse(204, "Product successfully updated")]
-        [SwaggerResponse(400, "Invalid product data")]
-        [SwaggerResponse(404, "Product not found")]
         public async Task<IActionResult> UpdateProduct(int id, [FromBody] Product product)
         {
             if (id != product.Id)
@@ -116,13 +86,7 @@ namespace API.Controllers
             return NoContent();
         }
 
-        /// <summary>
-        /// Delete a product
-        /// </summary>
         [HttpDelete("{id}")]
-        [SwaggerOperation(Summary = "Delete a product")]
-        [SwaggerResponse(204, "Product successfully deleted")]
-        [SwaggerResponse(404, "Product not found")]
         public async Task<IActionResult> DeleteProduct(int id)
         {
             if (!await _repository.ExistsAsync(id))

@@ -6,6 +6,8 @@ using API.Middleware;
 using Microsoft.AspNetCore.Mvc;
 using API.Errors;
 using StackExchange.Redis;
+using Core.Entities;
+using Microsoft.AspNetCore.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,23 +18,21 @@ builder.Logging.AddDebug();
 
 builder.Services.AddControllers();
    
-// ADD RETRY LOGIC HERE
+// Configure DbContext with retry logic
 builder.Services.AddDbContext<StoreContext>(options =>
     options.UseSqlServer(
         builder.Configuration.GetConnectionString("DefaultConnection"),
         sqlServerOptionsAction: sqlOptions =>
         {
-            // Enable retry on failure for transient errors
             sqlOptions.EnableRetryOnFailure(
                 maxRetryCount: 5,
                 maxRetryDelay: TimeSpan.FromSeconds(30),
                 errorNumbersToAdd: null);
             
-            // Set command timeout to 60 seconds
             sqlOptions.CommandTimeout(60);
         }));
 
-// ADD REDIS RETRY LOGIC
+// Configure Redis with retry logic
 builder.Services.AddSingleton<IConnectionMultiplexer>(config =>
 {
     var connString = builder.Configuration.GetConnectionString("Redis") 
@@ -50,8 +50,11 @@ builder.Services.AddSingleton<IConnectionMultiplexer>(config =>
 
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 builder.Services.AddScoped<ICartService, CartService>();
+builder.Services.AddAuthorization();
+builder.Services.AddIdentityApiEndpoints<AppUser>()
+    .AddEntityFrameworkStores<StoreContext>();
 
-// FIX CORS - Remove duplicates and use single policy
+// Configure CORS
 var isDevelopment = builder.Environment.IsDevelopment();
 
 builder.Services.AddCors(options =>
@@ -63,6 +66,7 @@ builder.Services.AddCors(options =>
             policy.WithOrigins("http://localhost:4200", "https://localhost:4200")
                   .AllowAnyHeader()
                   .AllowAnyMethod()
+                  .AllowCredentials()
                   .AllowCredentials();
         }
         else
@@ -70,6 +74,7 @@ builder.Services.AddCors(options =>
             policy.WithOrigins("https://shopnet2k6.azurewebsites.net")
                   .AllowAnyHeader()
                   .AllowAnyMethod()
+                  .AllowCredentials()
                   .AllowCredentials();
         }
     });
@@ -99,6 +104,7 @@ var app = builder.Build();
 var logger = app.Services.GetRequiredService<ILogger<Program>>();
 logger.LogInformation("Application starting up...");
 
+// Database initialization with retry
 await InitializeDatabaseAsync(app, logger);
 
 app.UseMiddleware<ExceptionMiddleware>();
@@ -118,14 +124,14 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-app.UseAuthorization();
 
 app.UseDefaultFiles();
 app.UseStaticFiles();
 
 app.MapControllers();
-app.MapFallbackToController("Index", "Fallback");
+app.MapGroup("api").MapIdentityApi<AppUser>();
 
+app.MapFallbackToController("Index", "Fallback");
 logger.LogInformation("Application started successfully");
 
 app.Run();
@@ -146,7 +152,6 @@ async Task InitializeDatabaseAsync(WebApplication app, ILogger logger)
 
             scopedLogger.LogInformation("Database initialization attempt {Attempt} of {MaxRetries}", attempt, maxRetries);
 
-            // Test connection first
             var canConnect = await context.Database.CanConnectAsync();
             if (!canConnect)
             {
@@ -155,17 +160,15 @@ async Task InitializeDatabaseAsync(WebApplication app, ILogger logger)
 
             scopedLogger.LogInformation("Database connection successful");
 
-            // Run migrations
             scopedLogger.LogInformation("Starting database migration...");
             await context.Database.MigrateAsync();
             scopedLogger.LogInformation("Database migration completed successfully");
 
-            // Seed data
             scopedLogger.LogInformation("Starting database seeding...");
             await StoreContextSeed.SeedAsync(context, scopedLogger);
             scopedLogger.LogInformation("Database seeding completed successfully");
 
-            return; // Success - exit retry loop
+            return;
         }
         catch (Exception ex)
         {
