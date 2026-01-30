@@ -1,0 +1,12 @@
+<div class="flex items-center justify-center min-h-[60vh]">
+  <div class="text-center bg-white rounded-3xl shadow-xl p-12 max-w-md border border-gray-100">
+    <div class="w-32 h-32 mx-auto mb-6 rounded-full bg-gradient-to-br from-blue-100 to-indigo-100 flex items-center justify-center">
+      <mat-icon class="text-7xl! w-16! h-16! text-blue-600">{{ iconName() }}</mat-icon>
+    </div>
+    <h2 class="text-3xl font-bold text-gray-900 mb-3">{{ title() }}</h2>
+    <p class="text-gray-600 text-lg mb-8">{{ message() }}</p>
+    <button mat-raised-button color="primary" (click)="onActionClick()" class="px-8! py-3! text-base! rounded-xl!">
+      {{ buttonText() }}
+    </button>
+  </div>
+</div>

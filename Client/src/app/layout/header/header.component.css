@@ -1,18 +1,59 @@
+/* Desktop badge styling */
 .custom-badge .mat-badge-content {
-  width: 24px;
-  height: 24px;
-  font-size: 14px;
-  line-height: 24px; 
+  width: 20px;
+  height: 20px;
+  font-size: 12px;
+  line-height: 20px;
+  background-color: #2563eb !important;
+  font-weight: 700;
 }
 
 .custom-badge mat-icon {
-  font-size: 32px;
-  width: 32px;
-  height: 32px; 
+  font-size: 28px;
+  width: 28px;
+  height: 28px;
+  cursor: pointer;
+  transition: color 0.2s ease;
 }
 
-a {
-  &.active {
-    color: #7d00fa
-  }
+/* Mobile badge styling */
+.custom-badge-mobile .mat-badge-content {
+  width: 16px;
+  height: 16px;
+  font-size: 10px;
+  line-height: 16px;
+  background-color: #2563eb !important;
+  font-weight: 700;
+}
+
+.custom-badge-mobile mat-icon {
+  font-size: 24px;
+  width: 24px;
+  height: 24px;
+}
+
+/* Active Links - Desktop & Mobile */
+a.active {
+  color: #2563eb !important;
+  background-color: #eff6ff !important;
+  font-weight: 700 !important;
+}
+
+/* Active Cart Link */
+a.custom-badge.active mat-icon,
+a.custom-badge-mobile.active mat-icon {
+  color: #2563eb !important;
+}
+
+/* Focus Styles for Accessibility */
+button:focus-visible,
+a:focus-visible {
+  outline: 2px solid #2563eb !important;
+  outline-offset: 2px;
+  border-radius: 0.5rem;
+}
+
+/* Smooth header transition */
+header {
+  transition: all 0.3s ease-in-out;
 }

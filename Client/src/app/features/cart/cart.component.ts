@@ -3,13 +3,14 @@ import { Router } from '@angular/router';
 import { CartService } from '../../core/services/cart.service';
 import { CartItemComponent } from './cart-item/cart-item.component';
 import { OrderSummaryComponent } from '../../shared/components/order-summary/order-summary.component';
+import { EmptyCartStateComponent } from '../../shared/components/empty-cart-state/empty-cart-state.component';
 import { CurrencyPipe } from '@angular/common';
 import { MatButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 
 @Component({
   selector: 'app-cart',
-  imports: [CartItemComponent, OrderSummaryComponent, CurrencyPipe, MatButton, MatIcon],
+  imports: [CartItemComponent, OrderSummaryComponent, EmptyCartStateComponent, CurrencyPipe, MatButton, MatIcon],
   templateUrl: './cart.component.html',
   styleUrl: './cart.component.css',
 })

@@ -71,18 +71,7 @@
       </div>
     } @else {
       <!-- Empty State -->
-      <div class="flex items-center justify-center min-h-[60vh]">
-        <div class="text-center bg-white rounded-3xl shadow-xl p-12 max-w-md border border-gray-100">
-          <div class="w-32 h-32 mx-auto mb-6 rounded-full bg-gradient-to-br from-blue-100 to-indigo-100 flex items-center justify-center">
-            <mat-icon class="text-7xl! w-16! h-16! text-blue-600">shopping_cart</mat-icon>
-          </div>
-          <h2 class="text-3xl font-bold text-gray-900 mb-3">Your cart is empty</h2>
-          <p class="text-gray-600 text-lg mb-8">Discover amazing products and start shopping!</p>
-          <button mat-raised-button color="primary" (click)="goToShop()" class="px-8! py-3! text-base! rounded-xl!">
-            Start Shopping
-          </button>
-        </div>
-      </div>
+      <app-empty-cart-state (actionClick)="goToShop()" />
     }
   </div>
 </div>

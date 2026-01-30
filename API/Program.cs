@@ -11,14 +11,14 @@ using Microsoft.AspNetCore.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Configure logging to include console output
+// Configure logging
 builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
 builder.Logging.AddDebug();
 
 builder.Services.AddControllers();
-   
-// Configure DbContext with retry logic
+
+// Configure DbContext with retry logic and connection pooling
 builder.Services.AddDbContext<StoreContext>(options =>
     options.UseSqlServer(
         builder.Configuration.GetConnectionString("DefaultConnection"),
@@ -30,22 +30,35 @@ builder.Services.AddDbContext<StoreContext>(options =>
                 errorNumbersToAdd: null);
             
             sqlOptions.CommandTimeout(60);
-        }));
+        })
+        .EnableSensitiveDataLogging(builder.Environment.IsDevelopment())
+        .EnableDetailedErrors(builder.Environment.IsDevelopment()));
 
-// Configure Redis with retry logic
-builder.Services.AddSingleton<IConnectionMultiplexer>(config =>
+// Configure Redis with lazy connection (doesn't block startup)
+builder.Services.AddSingleton<IConnectionMultiplexer>(serviceProvider =>
 {
-    var connString = builder.Configuration.GetConnectionString("Redis") 
-        ?? throw new InvalidOperationException("Redis connection string not found");
+    var configuration = serviceProvider.GetRequiredService<IConfiguration>();
+    var logger = serviceProvider.GetRequiredService<ILogger<Program>>();
     
-    var configuration = ConfigurationOptions.Parse(connString, true);
-    configuration.ConnectRetry = 5;
-    configuration.ConnectTimeout = 10000;
-    configuration.SyncTimeout = 5000;
-    configuration.AbortOnConnectFail = false;
-    configuration.ReconnectRetryPolicy = new ExponentialRetry(5000);
-    
-    return ConnectionMultiplexer.Connect(configuration);
+    try
+    {
+        var connString = configuration.GetConnectionString("Redis") 
+            ?? throw new InvalidOperationException("Redis connection string not found");
+        
+        var redisConfig = ConfigurationOptions.Parse(connString, true);
+        redisConfig.ConnectRetry = 3;
+        redisConfig.ConnectTimeout = 5000;
+        redisConfig.SyncTimeout = 3000;
+        redisConfig.AbortOnConnectFail = false;
+        redisConfig.ReconnectRetryPolicy = new ExponentialRetry(3000);
+        
+        return ConnectionMultiplexer.Connect(redisConfig);
+    }
+    catch (Exception ex)
+    {
+        logger.LogError(ex, "Failed to connect to Redis");
+        throw;
+    }
 });
 
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
@@ -54,7 +67,16 @@ builder.Services.AddAuthorization();
 builder.Services.AddIdentityApiEndpoints<AppUser>()
     .AddEntityFrameworkStores<StoreContext>();
 
-// Configure CORS
+// Configure cookie policy for authentication
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.Cookie.HttpOnly = true;
+    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+    options.Cookie.SameSite = SameSiteMode.None;
+    options.Cookie.Name = ".AspNetCore.Identity.Application";
+});
+
+// Configure CORS - Fixed duplicate AllowCredentials
 var isDevelopment = builder.Environment.IsDevelopment();
 
 builder.Services.AddCors(options =>
@@ -66,7 +88,6 @@ builder.Services.AddCors(options =>
             policy.WithOrigins("http://localhost:4200", "https://localhost:4200")
                   .AllowAnyHeader()
                   .AllowAnyMethod()
-                  .AllowCredentials()
                   .AllowCredentials();
         }
         else
@@ -74,7 +95,6 @@ builder.Services.AddCors(options =>
             policy.WithOrigins("https://shopnet2k6.azurewebsites.net")
                   .AllowAnyHeader()
                   .AllowAnyMethod()
-                  .AllowCredentials()
                   .AllowCredentials();
         }
     });
@@ -104,8 +124,18 @@ var app = builder.Build();
 var logger = app.Services.GetRequiredService<ILogger<Program>>();
 logger.LogInformation("Application starting up...");
 
-// Database initialization with retry
-await InitializeDatabaseAsync(app, logger);
+// ✅ CRITICAL: Only run migrations in Development or when explicitly enabled
+var shouldMigrate = app.Configuration.GetValue<bool>("RunMigrations", false) || app.Environment.IsDevelopment();
+
+if (shouldMigrate)
+{
+    logger.LogInformation("Migration mode enabled. Running database initialization...");
+    await InitializeDatabaseAsync(app, logger);
+}
+else
+{
+    logger.LogInformation("Production mode: Skipping migrations. Database should already be initialized.");
+}
 
 app.UseMiddleware<ExceptionMiddleware>();
 
@@ -132,14 +162,15 @@ app.MapControllers();
 app.MapGroup("api").MapIdentityApi<AppUser>();
 
 app.MapFallbackToController("Index", "Fallback");
+
 logger.LogInformation("Application started successfully");
 
 app.Run();
 
 async Task InitializeDatabaseAsync(WebApplication app, ILogger logger)
 {
-    const int maxRetries = 5;
-    const int delayMilliseconds = 2000;
+    const int maxRetries = 3; // Reduced from 5
+    const int delayMilliseconds = 1000; // Reduced from 2000
 
     for (int attempt = 1; attempt <= maxRetries; attempt++)
     {
@@ -160,13 +191,30 @@ async Task InitializeDatabaseAsync(WebApplication app, ILogger logger)
 
             scopedLogger.LogInformation("Database connection successful");
 
-            scopedLogger.LogInformation("Starting database migration...");
-            await context.Database.MigrateAsync();
-            scopedLogger.LogInformation("Database migration completed successfully");
+            // ✅ Only run migrations if there are pending migrations
+            var pendingMigrations = await context.Database.GetPendingMigrationsAsync();
+            if (pendingMigrations.Any())
+            {
+                scopedLogger.LogInformation("Pending migrations found: {Count}. Running migrations...", pendingMigrations.Count());
+                await context.Database.MigrateAsync();
+                scopedLogger.LogInformation("Database migration completed successfully");
+            }
+            else
+            {
+                scopedLogger.LogInformation("No pending migrations. Database is up to date.");
+            }
 
-            scopedLogger.LogInformation("Starting database seeding...");
-            await StoreContextSeed.SeedAsync(context, scopedLogger);
-            scopedLogger.LogInformation("Database seeding completed successfully");
+            // ✅ Only seed if Products table is empty
+            if (!await context.Products.AnyAsync())
+            {
+                scopedLogger.LogInformation("Database is empty. Starting seeding...");
+                await StoreContextSeed.SeedAsync(context, scopedLogger);
+                scopedLogger.LogInformation("Database seeding completed successfully");
+            }
+            else
+            {
+                scopedLogger.LogInformation("Database already contains data. Skipping seeding.");
+            }
 
             return;
         }

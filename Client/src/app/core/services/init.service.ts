@@ -1,27 +1,23 @@
 import { inject, Injectable } from '@angular/core';
 import { CartService } from './cart.service';
-import { firstValueFrom, of } from 'rxjs';
+import { firstValueFrom, forkJoin, of } from 'rxjs';
+import { AccountService } from './account.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class InitService {
   private cartService = inject(CartService);
+  private accountService = inject(AccountService);
+  //private signalrService = inject(SignalrService);
 
   init() {
     const cartId = localStorage.getItem('cart_id');
-    
-    if (cartId) {
-      return firstValueFrom(
-        this.cartService.getCart(cartId)
-      ).catch((error) => {
-        console.error('Failed to load cart:', error);
-        // Clear invalid cart ID from localStorage
-        localStorage.removeItem('cart_id');
-        return null;
-      });
-    }
-    
-    return Promise.resolve(null);
+    const cart$ = cartId ? this.cartService.getCart(cartId) : of(null);
+
+    return forkJoin({
+      cart: cart$,
+      user: this.accountService.getUserInfo()
+    })
   }
 }

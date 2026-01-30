@@ -1,15 +1,14 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { MatIcon } from "@angular/material/icon";
-import { MatButton } from "@angular/material/button";
+import { MatButton } from "@angular/material/button"; 
 import { MatBadge } from "@angular/material/badge";
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { MatProgressBar } from "@angular/material/progress-bar";
 import { BusyService } from '../../core/services/busy.service';
-// import { CartService } from '../../core/services/cart.service';
-// import { AccountService } from '../../core/services/account.service';
+import { CartService } from '../../core/services/cart.service';
+import { AccountService } from '../../core/services/account.service';
 import { MatDivider } from '@angular/material/divider';
 import { MatMenuTrigger, MatMenu, MatMenuItem } from '@angular/material/menu';
-import { CartService } from '../../core/services/cart.service';
 // import { IsAdmin } from '../../shared/directives/is-admin';
 
 @Component({
@@ -20,6 +19,11 @@ import { CartService } from '../../core/services/cart.service';
     RouterLink,
     RouterLinkActive,
     MatProgressBar,
+    MatButton,
+    MatDivider,
+    MatMenuTrigger,
+    MatMenu,
+    MatMenuItem
     //,IsAdmin 
   ],
   templateUrl: './header.component.html',
@@ -28,19 +32,28 @@ import { CartService } from '../../core/services/cart.service';
 export class HeaderComponent {
   busyService = inject(BusyService);
   cartService = inject(CartService);
-  // accountService = inject(AccountService);
+  accountService = inject(AccountService);
   private router = inject(Router);
+  mobileMenuOpen = signal(false);
 
   getCartItemCount() {
     return this.cartService.itemCount();
   }
 
+  toggleMobileMenu() {
+    this.mobileMenuOpen.update(value => !value);
+  }
+
+  closeMobileMenu() {
+    this.mobileMenuOpen.set(false);
+  }
+
   logout() {
-    // this.accountService.logout().subscribe({
-    //   next: () => {
-    //     this.accountService.currentUser.set(null);
-    //     this.router.navigateByUrl('/');
-    //   }
-    // });
+    this.accountService.logout().subscribe({
+      next: () => {
+        this.accountService.currentUser.set(null);
+        this.router.navigateByUrl('/');
+      }
+    });
   }
 }
