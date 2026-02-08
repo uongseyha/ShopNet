@@ -101,7 +101,11 @@ export class ShopComponent implements OnInit {
     
   openFiltersDialog() {
     const dialogRef = this.dialogService.open(FiltersDialogComponent, {
-      minWidth: '500px',
+      width: '100%',
+      maxWidth: '600px',
+      minWidth: '280px',
+      maxHeight: '90vh',
+      panelClass: 'filters-dialog-container',
       data: {
         selectedBrands: this.shopParams.brands,
         selectedTypes: this.shopParams.types

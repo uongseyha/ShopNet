@@ -1,25 +1,95 @@
-<div>
-  <h3 class="text-3xl text-center pt-6 mb-3">Filters</h3>
-  <mat-divider></mat-divider>
-  <div class="flex p-4">
-    <div class="w-1/2">
-      <h4 class="font-semibold text-xl text-primary">Brands</h4>
-      <mat-selection-list [(ngModel)]="selectedBrands" [multiple]="true">
-        @for (brand of shopService.brands; track brand) {
-          <mat-list-option [value]="brand">{{brand}}</mat-list-option>
-        }
-      </mat-selection-list>
-    </div>
-    <div class="w-1/2">
-      <h4 class="font-semibold text-xl text-primary">Types</h4>
-      <mat-selection-list [(ngModel)]="selectedTypes" [multiple]="true">
-        @for (type of shopService.types; track type) {
-          <mat-list-option [value]="type">{{type}}</mat-list-option>
-        }
-      </mat-selection-list>
+<div class="flex flex-col max-h-[90vh] bg-white">
+  <!-- Header -->
+  <div class="sticky top-0 bg-white z-10 border-b border-gray-200">
+    <div class="flex items-center justify-between px-4 sm:px-6 py-4">
+      <h2 class="text-xl sm:text-2xl font-bold text-gray-900">Filter Products</h2>
+      <button 
+        (click)="clearFilters()" 
+        class="text-sm font-medium text-primary hover:text-primary/80 transition-colors"
+        [disabled]="selectedBrands.length === 0 && selectedTypes.length === 0"
+        [class.opacity-50]="selectedBrands.length === 0 && selectedTypes.length === 0"
+        [class.cursor-not-allowed]="selectedBrands.length === 0 && selectedTypes.length === 0">
+        Clear All
+      </button>
     </div>
   </div>
-  <div class="flex justify-end p-4">
-    <button mat-flat-button (click)="applyFilters()">Apply Filters</button>
+
+  <!-- Filters Content -->
+  <div class="flex-1 overflow-y-auto px-4 sm:px-6 py-4 space-y-6">
+    
+    <!-- Brands Section -->
+    <div class="space-y-3">
+      <div class="flex items-center justify-between">
+        <h3 class="text-base sm:text-lg font-semibold text-gray-900">Brands</h3>
+        <span class="text-xs sm:text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
+          {{selectedBrands.length}} selected
+        </span>
+      </div>
+      
+      <div class="flex flex-wrap gap-2">
+        @for (brand of shopService.brands; track brand) {
+          <button
+            (click)="toggleBrand(brand)"
+            [class.bg-primary]="isSelected(brand, 'brand')"
+            [class.text-white]="isSelected(brand, 'brand')"
+            [class.border-primary]="isSelected(brand, 'brand')"
+            [class.bg-white]="!isSelected(brand, 'brand')"
+            [class.text-gray-700]="!isSelected(brand, 'brand')"
+            [class.border-gray-300]="!isSelected(brand, 'brand')"
+            [class.hover:border-primary]="!isSelected(brand, 'brand')"
+            class="px-3 sm:px-4 py-2 rounded-full border-2 text-sm font-medium transition-all duration-200 hover:shadow-md active:scale-95">
+            {{brand}}
+          </button>
+        }
+      </div>
+    </div>
+
+    <!-- Divider -->
+    <div class="border-t border-gray-200"></div>
+
+    <!-- Types Section -->
+    <div class="space-y-3">
+      <div class="flex items-center justify-between">
+        <h3 class="text-base sm:text-lg font-semibold text-gray-900">Product Types</h3>
+        <span class="text-xs sm:text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
+          {{selectedTypes.length}} selected
+        </span>
+      </div>
+      
+      <div class="flex flex-wrap gap-2">
+        @for (type of shopService.types; track type) {
+          <button
+            (click)="toggleType(type)"
+            [class.bg-primary]="isSelected(type, 'type')"
+            [class.text-white]="isSelected(type, 'type')"
+            [class.border-primary]="isSelected(type, 'type')"
+            [class.bg-white]="!isSelected(type, 'type')"
+            [class.text-gray-700]="!isSelected(type, 'type')"
+            [class.border-gray-300]="!isSelected(type, 'type')"
+            [class.hover:border-primary]="!isSelected(type, 'type')"
+            class="px-3 sm:px-4 py-2 rounded-full border-2 text-sm font-medium transition-all duration-200 hover:shadow-md active:scale-95">
+            {{type}}
+          </button>
+        }
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="sticky bottom-0 bg-white border-t border-gray-200 px-4 sm:px-6 py-4">
+    <div class="flex flex-col-reverse sm:flex-row gap-3">
+      <button 
+        mat-stroked-button 
+        (click)="dialogRef.close()" 
+        class="w-full sm:w-auto sm:flex-1">
+        Cancel
+      </button>
+      <button 
+        mat-flat-button 
+        (click)="applyFilters()" 
+        class="w-full sm:w-auto sm:flex-1">
+        Apply Filters ({{selectedBrands.length + selectedTypes.length}})
+      </button>
+    </div>
   </div>
 </div>

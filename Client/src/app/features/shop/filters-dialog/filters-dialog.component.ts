@@ -22,15 +22,44 @@ import { MatButton } from '@angular/material/button';
 })
 export class FiltersDialogComponent{
   shopService = inject(ShopService);
-  private dialogRef = inject(MatDialogRef<FiltersDialogComponent>);
+  dialogRef = inject(MatDialogRef<FiltersDialogComponent>);
   data = inject(MAT_DIALOG_DATA);
-  selectedBrands: string[] = this.data.selectedBrands || [];
-  selectedTypes: string[] = this.data.selectedTypes || [];
+  selectedBrands: string[] = [...(this.data.selectedBrands || [])];
+  selectedTypes: string[] = [...(this.data.selectedTypes || [])];
+
+  toggleBrand(brand: string) {
+    const index = this.selectedBrands.indexOf(brand);
+    if (index > -1) {
+      this.selectedBrands.splice(index, 1);
+    } else {
+      this.selectedBrands.push(brand);
+    }
+  }
+
+  toggleType(type: string) {
+    const index = this.selectedTypes.indexOf(type);
+    if (index > -1) {
+      this.selectedTypes.splice(index, 1);
+    } else {
+      this.selectedTypes.push(type);
+    }
+  }
+
+  isSelected(item: string, type: 'brand' | 'type'): boolean {
+    return type === 'brand' 
+      ? this.selectedBrands.includes(item)
+      : this.selectedTypes.includes(item);
+  }
 
   applyFilters() {
     this.dialogRef.close({
       selectedBrands: this.selectedBrands,
       selectedTypes: this.selectedTypes
     });
+  }
+
+  clearFilters() {
+    this.selectedBrands = [];
+    this.selectedTypes = [];
   }
 }
