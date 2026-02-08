@@ -18,6 +18,14 @@ namespace Infrastructure.Config
             builder.Property(p => p.Name)
                 .IsRequired();
             
+            // Add indexes for search and filter performance
+            builder.HasIndex(p => p.Name);
+            builder.HasIndex(p => p.Brand);
+            builder.HasIndex(p => p.Type);
+            builder.HasIndex(p => p.Price);
+            
+            // Composite index for common queries
+            builder.HasIndex(p => new { p.Brand, p.Type, p.Price });
         }
     }
 }

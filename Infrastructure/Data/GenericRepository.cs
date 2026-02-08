@@ -15,12 +15,12 @@ namespace Infrastructure.Data
 
         public virtual async Task<IEnumerable<T>> GetAllAsync()
         {
-            return await _context.Set<T>().ToListAsync();
+            return await _context.Set<T>().AsNoTracking().ToListAsync();
         }
 
         public virtual async Task<IEnumerable<T>> GetAllAsync(ISpecification<T> spec)
         {
-            return await ApplySpecification(spec).ToListAsync();
+            return await ApplySpecification(spec).AsNoTracking().ToListAsync();
         }
 
         public virtual async Task<IEnumerable<TResult>> GetAllAsync<TResult>(ISpecification<T> spec)

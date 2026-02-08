@@ -19,6 +19,7 @@ namespace API.Controllers
         /// Get all products with optional filtering, sorting, and pagination
         /// </summary>
         [HttpGet]
+        [ResponseCache(Duration = 60, Location = ResponseCacheLocation.Any, VaryByQueryKeys = new[] { "*" })]
         public async Task<ActionResult<Pagination<Product>>> GetProducts([FromQuery] ProductSpecParams specParams)
         {
             var spec = new ProductSpecification(specParams);
@@ -47,6 +48,7 @@ namespace API.Controllers
         }
 
         [HttpGet("brands")]
+        [ResponseCache(Duration = 300)]
         public async Task<ActionResult<IEnumerable<string>>> GetBrands()
         {
             var spec = new ProductBrandSpecification();
@@ -55,6 +57,7 @@ namespace API.Controllers
         }
 
         [HttpGet("types")]
+        [ResponseCache(Duration = 300)]
         public async Task<ActionResult<IEnumerable<string>>> GetTypes()
         {
             var spec = new ProductTypeSpecification();
