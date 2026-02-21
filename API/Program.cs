@@ -70,19 +70,23 @@ app.MapGroup("api").MapIdentityApi<AppUser>();
 //app.MapHub<NotificationHub>("/hub/notifications");
 app.MapFallbackToController("Index", "Fallback");
 
-try
+// Only run migrations in Development or when explicitly needed
+if (app.Environment.IsDevelopment())
 {
-    using var scope = app.Services.CreateScope();
-    var services = scope.ServiceProvider;
-    var context = services.GetRequiredService<StoreContext>();
-    var userManager = services.GetRequiredService<UserManager<AppUser>>();
-    await context.Database.MigrateAsync();
-    await StoreContextSeed.SeedAsync(context,logger: app.Logger);
-}
-catch (Exception e)
-{
-    Console.WriteLine(e);
-    throw;
+    try
+    {
+        using var scope = app.Services.CreateScope();
+        var services = scope.ServiceProvider;
+        var context = services.GetRequiredService<StoreContext>();
+        var userManager = services.GetRequiredService<UserManager<AppUser>>();
+        await context.Database.MigrateAsync();
+        await StoreContextSeed.SeedAsync(context, logger: app.Logger);
+    }
+    catch (Exception e)
+    {
+        Console.WriteLine(e);
+        throw;
+    }
 }
 
 app.Run();
