@@ -36,8 +36,14 @@ bld/
 .idea/
 *.sln.iml
 
-# Uncomment if you have tasks that create the project's static files in wwwroot
-#wwwroot/
+# Angular build output in API/wwwroot (built in CI/Docker; do not commit)
+API/wwwroot/chunk-*.js
+API/wwwroot/main-*.js
+API/wwwroot/styles-*.css
+API/wwwroot/index.html
+API/wwwroot/prerendered-routes.json
+API/wwwroot/3rdpartylicenses.txt
+API/wwwroot/favicon.ico
 
 # MSTest test Results
 [Tt]est[Rr]esult*/
