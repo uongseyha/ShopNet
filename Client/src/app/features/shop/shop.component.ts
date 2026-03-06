@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal, HostListener, effect } from '@angular/core';
+import { Component, inject, OnInit, signal, HostListener } from '@angular/core';
 import { Product } from '../../shared/models/product';
 import { ShopParams } from '../../shared/models/shopParams';
 import { ShopService } from '../../core/services/shop.service';
@@ -74,8 +74,7 @@ export class ShopComponent implements OnInit {
   }
 
   initialzeShop() {
-    this.shopService.getTypes();
-    this.shopService.getBrands();
+    // Load only products on first paint; types/brands load when user opens filters
     this.getProducts();
   }
 
@@ -100,6 +99,7 @@ export class ShopComponent implements OnInit {
   }
     
   openFiltersDialog() {
+    this.shopService.ensureFiltersLoaded();
     const dialogRef = this.dialogService.open(FiltersDialogComponent, {
       width: '100%',
       maxWidth: '600px',

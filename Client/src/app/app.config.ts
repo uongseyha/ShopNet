@@ -4,7 +4,7 @@ import {
   provideZoneChangeDetection,
   provideBrowserGlobalErrorListeners,
 } from '@angular/core';
-import { provideRouter } from '@angular/router';
+import { provideRouter, withPreloading, PreloadAllModules } from '@angular/router';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { routes } from './app.routes';
 import { errorInterceptor } from './core/interceptors/error.interceptor';
@@ -16,11 +16,15 @@ export const appConfig: ApplicationConfig = {
   providers: [
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideBrowserGlobalErrorListeners(),
-    provideRouter(routes),
+    provideRouter(routes, withPreloading(PreloadAllModules)),
     provideHttpClient(withInterceptors([loadingInterceptor, errorInterceptor, authInterceptor])),
     {
       provide: APP_INITIALIZER,
-      useFactory: (initService: InitService) => () => initService.init(),
+      useFactory: (initService: InitService) => () => {
+        // Run cart/user load in background so app shell renders immediately
+        initService.init().subscribe();
+        return Promise.resolve();
+      },
       deps: [InitService],
       multi: true,
     },

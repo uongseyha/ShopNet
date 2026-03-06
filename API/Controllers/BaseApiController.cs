@@ -17,6 +17,7 @@ namespace API.Controllers
             int pageIndex,
             int pageSize) where T : class
         {
+            // Sequential: DbContext is not thread-safe; list and count must not run concurrently on the same instance.
             var items = await repository.GetAllAsync(spec);
             var totalItems = await repository.CountAsync(countSpec);
 

@@ -3,6 +3,7 @@
     <img
       src="{{ product.pictureUrl }}"
       [routerLink]="'/shop/' + product.id"
+      loading="lazy"
       class="w-full object-cover rounded-t-lg"
       alt="image of {{ product.name }}"
     />

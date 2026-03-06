@@ -60,6 +60,14 @@ export class CartService {
     );
   }
 
+  /** Call when navigating to cart so cart is loaded if we have cart_id but cart not yet set (e.g. after non-blocking init). */
+  ensureCartLoaded(): void {
+    const cartId = localStorage.getItem('cart_id');
+    if (cartId && !this.cart()) {
+      this.getCart(cartId).subscribe();
+    }
+  }
+
   setCart(cart: Cart) {
     return this.http.post<Cart>(this.baseUrl, cart).pipe(
       tap((cart) => {

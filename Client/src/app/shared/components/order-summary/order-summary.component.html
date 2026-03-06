@@ -62,26 +62,6 @@
           <mat-icon class="text-base!">close</mat-icon>
         </button>
       </div>
-    } @else {
-      <div class="space-y-2">
-        <label class="text-sm font-medium text-gray-600">Have a voucher code?</label>
-        <div class="flex gap-2">
-          <mat-form-field appearance="outline" class="flex-1!">
-            <input matInput 
-                   placeholder="Enter code" 
-                   [(ngModel)]="voucherCode"
-                   (keyup.enter)="onApplyVoucher()"
-                   class="text-sm! ml-1" />
-          </mat-form-field>
-          <button mat-raised-button 
-                  color="primary"
-                  (click)="onApplyVoucher()"
-                  [disabled]="!voucherCode().trim()"
-                  class="h-14! px-6! text-sm! font-semibold! whitespace-nowrap!">
-            Apply
-          </button>
-        </div>
-      </div>
     }
   </div>
 

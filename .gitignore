@@ -360,12 +360,20 @@ MigrationBackup/
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
 
-# Environment variables
+# Environment variables and local secret files
 .env
+.env.*
 .env.local
 .env.development.local
 .env.test.local
 .env.production.local
+!.env.example
+
+# API config with secrets (use appsettings.Development.example.json as template)
+API/appsettings.json
+API/appsettings.Development.json
+API/appsettings.Production.json
+API/appsettings.*.local.json
 
 # Database files
 *.db
@@ -376,5 +384,7 @@ FodyWeavers.xsd
 
 # macOS
 .DS_Store
-API/appsettings.json
+
+# Lock files (optional: remove to commit for reproducible installs)
+# Client/package-lock.json
 Client/package-lock.json

@@ -72,8 +72,17 @@ export class ShopService {
     if (this.types.length > 0) return;
 
     return this.http.get<string[]>(`${this.baseUrl}/types`).subscribe({
-      next: (response) => this.types=response,
-      error: (error) => console.error(error)
+      next: (response) => (this.types = response),
+      error: (error) => console.error(error),
     });
+  }
+
+  /**
+   * Ensure brands and types are loaded (e.g. before opening filters dialog).
+   * Safe to call repeatedly; only fetches once and caches.
+   */
+  ensureFiltersLoaded(): void {
+    this.getTypes();
+    this.getBrands();
   }
 }

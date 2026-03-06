@@ -1,0 +1,40 @@
+# Git and version control
+.git
+.gitignore
+.github
+
+# IDE and editor
+.vs
+.vscode
+.idea
+*.user
+*.suo
+
+# Build outputs (not needed in image build context)
+**/bin
+**/obj
+**/out
+**/publish
+**/node_modules
+**/.angular
+
+# Secrets and local config
+.env
+.env.*
+!.env.example
+**/appsettings.Development.json
+**/appsettings.Production.json
+**/appsettings.*.local.json
+
+# Tests and tooling
+**/coverage
+**/*.Tests
+**/TestResults
+**/__screenshots__
+
+# Docs and misc
+*.md
+!API/README.md
+
+# Client source (Dockerfile only builds API; include if you add a multi-stage client build later)
+# Client/

@@ -31,7 +31,11 @@
     </div>
   </div>
 
-  @if (products() && products()!.count > 0) {
+  @if (loading() && !products()) {
+    <div class="flex justify-center w-full py-16" aria-label="Loading products">
+      <mat-spinner diameter="48"></mat-spinner>
+    </div>
+  } @else if (products() && products()!.count > 0) {
     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
       @for (product of allProducts(); track product.id) {
         <app-product-items [product]="product"></app-product-items>

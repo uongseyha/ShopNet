@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { CartService } from '../../core/services/cart.service';
 import { CartItemComponent } from './cart-item/cart-item.component';
@@ -14,9 +14,13 @@ import { MatIcon } from '@angular/material/icon';
   templateUrl: './cart.component.html',
   styleUrl: './cart.component.css',
 })
-export class CartComponent {
+export class CartComponent implements OnInit {
   cartService = inject(CartService);
   router = inject(Router);
+
+  ngOnInit(): void {
+    this.cartService.ensureCartLoaded();
+  }
 
   getAppliedVoucher(): string | null {
     const cart = this.cartService.cart();
