@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Core.Entities;
 using Core.Interfaces;
+using API.DTOs;
 
 namespace API.Controllers
 {
@@ -11,6 +12,22 @@ namespace API.Controllers
         public CartController(ICartService cartService)
         {
             _cartService = cartService;
+        }
+
+        /// <summary>
+        /// Demo checkout: accepts cart id and optional user/shipping info, clears the cart. No real payment.
+        /// </summary>
+        [HttpPost("checkout")]
+        public async Task<ActionResult> Checkout([FromBody] CheckoutRequestDto request)
+        {
+            if (string.IsNullOrWhiteSpace(request.CartId))
+                return BadRequest(new { message = "CartId is required" });
+
+            var deleted = await _cartService.DeleteCartAsync(request.CartId);
+            if (!deleted)
+                return NotFound(new { message = "Cart not found or already cleared" });
+
+            return Ok(new { message = "Order placed (demo). Cart cleared.", orderId = Guid.NewGuid().ToString("N")[..8].ToUpperInvariant() });
         }
 
         [HttpGet()]

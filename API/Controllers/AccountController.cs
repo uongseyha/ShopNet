@@ -52,6 +52,8 @@ public class AccountController(SignInManager<AppUser> signInManager, UserManager
             return Unauthorized(new ApiErrorResponse(401));
         }
 
+        await signInManager.SignInAsync(user, isPersistent: true);
+
         return Ok(new UserDto
         {
             Email = user.Email!,

@@ -1,13 +1,26 @@
-﻿using API.Middleware;
+using API.Middleware;
+using API.Services;
 using Core.Entities;
 using Core.Interfaces;
 using Infrastructure.Data;
 using Infrastructure.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.StackExchangeRedis;
 using StackExchange.Redis;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Removes options not supported by StackExchange.Redis (e.g. abortConnection from Upstash)
+static string StripUnsupportedRedisOptions(string connectionString)
+{
+    var stripped = System.Text.RegularExpressions.Regex.Replace(
+        connectionString,
+        @",?\s*abortConnection\s*=\s*(?:True|False)\s*,?",
+        "",
+        System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+    return System.Text.RegularExpressions.Regex.Replace(stripped, @",{2,}", ",").Trim();
+}
 
 // Add services to the container.
 
@@ -27,14 +40,25 @@ builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 
 builder.Services.AddCors();
-builder.Services.AddSingleton<IConnectionMultiplexer>(config =>
+
+// StackExchange.Redis does not support 'abortConnection'; strip it for Upstash/Azure-style strings
+var redisConnectionString = StripUnsupportedRedisOptions(
+    builder.Configuration.GetConnectionString("Redis") ?? throw new Exception("Cannot get redis connection string"));
+
+builder.Services.AddSingleton<IConnectionMultiplexer>(_ =>
 {
-    var connectionString = builder.Configuration.GetConnectionString("Redis")
-        ?? throw new Exception("Cannot get redis connection string");
-    var configuation = ConfigurationOptions.Parse(connectionString, true);
+    var configuation = ConfigurationOptions.Parse(redisConnectionString, ignoreUnknown: true);
     return ConnectionMultiplexer.Connect(configuation);
 });
 builder.Services.AddSingleton<ICartService, CartService>();
+
+// Redis distributed cache for product data (30-day expiry)
+builder.Services.AddStackExchangeRedisCache(options =>
+{
+    options.Configuration = redisConnectionString;
+    options.InstanceName = "ShopNet:";
+});
+builder.Services.AddScoped<ProductCacheService>();
 
 // Add Response Caching
 builder.Services.AddResponseCaching();

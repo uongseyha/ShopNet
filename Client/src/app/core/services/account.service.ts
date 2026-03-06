@@ -17,10 +17,8 @@ export class AccountService {
     return this.http.post<User>(`${this.baseUrl}account/register`, values);
   }
 
-  login(values: any){
-    let params=new HttpParams();
-    params=params.append('useCookies','true');
-    return this.http.post<User>(`${this.baseUrl}login`, values, { params});
+  login(values: { email: string; password: string }) {
+    return this.http.post<User>(`${this.baseUrl}account/login`, values, { withCredentials: true });
   }
 
   logout(){

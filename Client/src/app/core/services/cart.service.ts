@@ -2,9 +2,26 @@ import { computed, inject, Injectable, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Cart, CartItem, Coupon } from '../../shared/models/cart';
 import { Product } from '../../shared/models/product';
-import { firstValueFrom, map, tap } from 'rxjs';
+import { firstValueFrom, map, Observable, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
-//import { DeliveryMethod } from '../../shared/models/deliveryMethod';
+
+export interface CheckoutPayload {
+  cartId: string;
+  userInfo?: { firstName?: string; lastName?: string; email?: string };
+  shippingAddress?: {
+    line1: string;
+    line2?: string;
+    city: string;
+    state: string;
+    country: string;
+    postalCode: string;
+  };
+}
+
+export interface CheckoutResponse {
+  message: string;
+  orderId: string;
+}
 
 @Injectable({
   providedIn: 'root',
@@ -110,6 +127,18 @@ export class CartService {
         this.cart.set(null);
       },
     });
+  }
+
+  /**
+   * Demo checkout: submit order info, clear cart in Redis and locally. No real payment.
+   */
+  checkout(payload: CheckoutPayload): Observable<CheckoutResponse> {
+    return this.http.post<CheckoutResponse>(this.baseUrl + '/checkout', payload).pipe(
+      tap(() => {
+        localStorage.removeItem('cart_id');
+        this.cart.set(null);
+      })
+    );
   }
 
   private addOrUpdateItem(items: CartItem[], item: CartItem, quantity: number) {

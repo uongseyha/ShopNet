@@ -1,4 +1,5 @@
 import { Component, inject, OnInit, signal, HostListener } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { Product } from '../../shared/models/product';
 import { ShopParams } from '../../shared/models/shopParams';
 import { ShopService } from '../../core/services/shop.service';
@@ -7,6 +8,7 @@ import { ProductItemsComponent } from "./product-items/product-items.component";
 import { MatIcon } from "@angular/material/icon";
 import { MatDialog } from '@angular/material/dialog';
 import { FiltersDialogComponent } from './filters-dialog/filters-dialog.component';
+import { SnackbarService } from '../../core/services/snackbar.service';
 import { MatButton } from '@angular/material/button';
 import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
 import { Pagination } from '../../shared/models/pagination';
@@ -14,7 +16,7 @@ import { FormsModule } from '@angular/forms';
 import { MatFormField, MatInput, MatLabel } from '@angular/material/input';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { Subject } from 'rxjs';
-import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged, take } from 'rxjs/operators';
 
 @Component({
   selector: 'app-shop',
@@ -37,7 +39,9 @@ import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 })
 export class ShopComponent implements OnInit {
   private shopService = inject(ShopService);
-  private dialogService = inject(MatDialog)
+  private dialogService = inject(MatDialog);
+  private route = inject(ActivatedRoute);
+  private snackbar = inject(SnackbarService);
   products = signal<Pagination<Product> | null>(null)
   allProducts = signal<Product[]>([]);
   loading = signal<boolean>(false);
@@ -71,6 +75,11 @@ export class ShopComponent implements OnInit {
   
   ngOnInit(): void {
     this.initialzeShop();
+    this.route.queryParams.pipe(take(1)).subscribe(params => {
+      if (params['orderComplete'] === 'true') {
+        this.snackbar.success('Demo order complete. Your cart has been cleared.');
+      }
+    });
   }
 
   initialzeShop() {
